@@ -1,0 +1,9 @@
+{
+  "host":"localhost",
+  "database": "cv",
+  "port": 5432,
+  "username": "postgres",
+  "password": "jojodio",
+  "dialect": "postgres",
+  "logging": true
+}

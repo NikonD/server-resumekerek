@@ -8,8 +8,6 @@ let app: Express = express()
 
 const allowedOrigins = ['http://localhost:3000', 'http://resumekerek.com'];
 
-
-
 app.use(bodyParser.urlencoded({ extended: true }))
 
 // parse application/json

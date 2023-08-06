@@ -6,7 +6,7 @@ import config from './config/config.json'
 
 let app: Express = express()
 
-const allowedOrigins = ['http://localhost:3000', 'http://example2.com'];
+const allowedOrigins = ['http://localhost:3000', 'http://resumekerek.com'];
 
 
 

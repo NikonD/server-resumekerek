@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "cd src && node index.ts"
+    "start": "ts-node src/index"
   },
   "author": "",
   "license": "ISC",

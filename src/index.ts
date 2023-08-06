@@ -2,7 +2,7 @@ import express, { Express } from "express";
 import cors from 'cors';
 import { Routes } from "./routes";
 import bodyParser from "body-parser";
-
+import config from './config/config.json'
 
 let app: Express = express()
 
@@ -29,6 +29,6 @@ app.use('/uploads', express.static('uploads'));
 
 app.use('/', Routes)
 
-app.listen(5000, ()=>{
+app.listen(config.PORT, ()=>{
   console.log("start server")
 })

@@ -5,4 +5,4 @@ RUN npm install --include=dev
 RUN npm i -g ts-node
 RUN npm run start
 
-EXPOSE 3000
+EXPOSE 5001

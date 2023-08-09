@@ -5,17 +5,23 @@ export interface resumesAttributes {
   id: number;
   user_id: number;
   resume: object;
+  filename: string;
+  template?: number;
+  date_create: Date;
 }
 
 export type resumesPk = "id";
 export type resumesId = resumes[resumesPk];
-export type resumesOptionalAttributes = "id";
+export type resumesOptionalAttributes = "id" | "template" | "date_create";
 export type resumesCreationAttributes = Optional<resumesAttributes, resumesOptionalAttributes>;
 
 export class resumes extends Model<resumesAttributes, resumesCreationAttributes> implements resumesAttributes {
   id!: number;
   user_id!: number;
   resume!: object;
+  filename!: string;
+  template?: number;
+  date_create!: Date;
 
 
   static initModel(sequelize: Sequelize.Sequelize): typeof resumes {
@@ -33,6 +39,20 @@ export class resumes extends Model<resumesAttributes, resumesCreationAttributes>
     resume: {
       type: DataTypes.JSON,
       allowNull: false
+    },
+    filename: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    template: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 1
+    },
+    date_create: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: Sequelize.Sequelize.fn('now')
     }
   }, {
     sequelize,

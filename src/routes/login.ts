@@ -3,32 +3,37 @@ import jwt from 'jsonwebtoken';
 import config from '../config/config.json'
 import { models } from "../models";
 import { compareSync, hashSync } from 'bcrypt'
+// import { users } from "../models/users";
 let loginRoute = Router()
 
 const authenticateUser = async (email: string, password: string) => {
-  const user = await models.users.findOne({
-    where: {
-      email: email
+  try {
+    const user = await models.users.findOne({
+      where: {
+        email: email
+      }
+    });
+    if (user && compareSync(password, user.password)) {
+      return user;
     }
-  });
-  if (user && compareSync(password, user.password)) {
-    return user;
+    return null;
+  } catch (e) {
+    console.log(e)
+    return null
   }
-  return null;
+  
 };
 
 loginRoute.route("/login").post(async (req: Request, res: Response) => {
   const { email, password } = req.body;
-
+  console.log("111")
   const user = await authenticateUser(email, password);
   if (!user) {
     return res.status(401).json({ message: 'Invalid credentials' });
   }
+  const token = jwt.sign({ userId: user.id }, config.JWT_SECRET);
 
-  // Создание JWT и отправка его в ответе.
-  const token = jwt.sign({ userId: user.id}, config.JWT_SECRET);
-  res.json({ token });
-
+  res.json({ message: 'Logged in successfully', data: token });
 })
 
 loginRoute.route("/verify").post(async (req: Request, res: Response) => {
@@ -41,25 +46,29 @@ loginRoute.route("/verify").post(async (req: Request, res: Response) => {
   }
 
   try {
-    // Проверка и верификация JWT.
-    const decoded = jwt.verify(token, config.JWT_SECRET);
-    // decoded.userId содержит идентификатор пользователя или другие данные, которые вы могли закодировать в токен при создании.
+    const decodedToken = jwt.verify(token, config.JWT_SECRET) as {userId: number};
+    console.log(decodedToken)
+    const user = await models.users.findOne({
+      where: {
+        id: decodedToken.userId
+      }, attributes: ["email", "fullname", "id", "plan", "active_until"]
+    })
+    if (!user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
 
-    // Вместо этого, здесь вы можете выполнить запрос к базе данных или другие действия, чтобы получить данные пользователя на основе decoded.userId.
-
-    // В этом примере, для простоты, мы просто возвращаем данные пользователя, которые могли бы быть получены из базы данных.
-    const user = { id: decoded, username: 'user1' };
-    res.json(user);
-  } catch (err) {
-    return res.status(401).json({ message: 'Unauthorized' });
+    res.json({ message: 'Access granted to protected route', user: user });
+  } catch (error) {
+    console.error('Protected route error:', error);
+    res.status(401).json({ message: 'Unauthorized' });
   }
 })
 
-loginRoute.route("/register").post(async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+loginRoute.route("/registration").post(async (req: Request, res: Response) => {
+  const { email, password, fullname } = req.body;
 
   // Проверка, что пользователь с таким именем пользователя не существует.
-  if (await models.users.findOne({where: {email: email}})) {
+  if (await models.users.findOne({ where: { email: email } })) {
     return res.status(400).json({ message: 'Username already exists' });
   }
 
@@ -70,14 +79,14 @@ loginRoute.route("/register").post(async (req: Request, res: Response) => {
     email: email,
     password: hashedPassword,
     verify: false,
-    fullname: ""
-  },{ returning: false })
+    fullname: fullname
+  }, { returning: false })
   // Создание новой записи пользователя.
   // const newUser = { id: users.length + 1, username, password: hashedPassword };
   // users.push(newUser);
 
   // Создание JWT для нового пользователя и его отправка в ответе.
-  const token = jwt.sign({ userId: newUser[0].id }, config.JWT_SECRET, { expiresIn: '1h' });
+  const token = jwt.sign({ userId: newUser[0].id }, config.JWT_SECRET, { expiresIn: '1d' });
   res.json({ token });
 })
 

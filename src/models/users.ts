@@ -8,11 +8,14 @@ export interface usersAttributes {
   verify_at?: Date;
   password: string;
   email: string;
+  plan?: number;
+  active_until?: Date;
+  profile_data?: object;
 }
 
 export type usersPk = "id";
 export type usersId = users[usersPk];
-export type usersOptionalAttributes = "id" | "verify_at";
+export type usersOptionalAttributes = "id" | "verify_at" | "plan" | "active_until" | "profile_data";
 export type usersCreationAttributes = Optional<usersAttributes, usersOptionalAttributes>;
 
 export class users extends Model<usersAttributes, usersCreationAttributes> implements usersAttributes {
@@ -22,6 +25,9 @@ export class users extends Model<usersAttributes, usersCreationAttributes> imple
   verify_at?: Date;
   password!: string;
   email!: string;
+  plan?: number;
+  active_until?: Date;
+  profile_data?: object;
 
 
   static initModel(sequelize: Sequelize.Sequelize): typeof users {
@@ -52,6 +58,18 @@ export class users extends Model<usersAttributes, usersCreationAttributes> imple
     email: {
       type: DataTypes.TEXT,
       allowNull: false
+    },
+    plan: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    active_until: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    profile_data: {
+      type: DataTypes.JSON,
+      allowNull: true
     }
   }, {
     sequelize,

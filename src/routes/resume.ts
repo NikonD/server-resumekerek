@@ -34,7 +34,7 @@ resumeRoute.route('/list').post(async (req: Request, res: Response) => {
       user_id: user.id
     }})
 
-    res.json(resumes)
+    res.json({ status:"ok", resumes})
   } catch (e) {
     res.json({ status: "error" })
   }

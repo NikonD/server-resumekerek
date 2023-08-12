@@ -11,7 +11,7 @@ const authenticateUser = async (email: string, password: string) => {
     const user = await models.users.findOne({
       where: {
         email: email
-      }
+      },
     });
     if (user && compareSync(password, user.password)) {
       return user;
@@ -21,7 +21,7 @@ const authenticateUser = async (email: string, password: string) => {
     console.log(e)
     return null
   }
-  
+
 };
 
 loginRoute.route("/login").post(async (req: Request, res: Response) => {
@@ -33,7 +33,17 @@ loginRoute.route("/login").post(async (req: Request, res: Response) => {
   }
   const token = jwt.sign({ userId: user.id }, config.JWT_SECRET);
 
-  res.json({ message: 'Logged in successfully', data: token });
+  res.json({ 
+    message: 'Logged in successfully', 
+    token: token, 
+    user: { 
+      email: user.email, 
+      fullname: user.fullname, 
+      plan: user.plan, 
+      active_until: 
+      user.active_until 
+    } 
+  });
 })
 
 loginRoute.route("/verify").post(async (req: Request, res: Response) => {
@@ -46,7 +56,7 @@ loginRoute.route("/verify").post(async (req: Request, res: Response) => {
   }
 
   try {
-    const decodedToken = jwt.verify(token, config.JWT_SECRET) as {userId: number};
+    const decodedToken = jwt.verify(token, config.JWT_SECRET) as { userId: number };
     console.log(decodedToken)
     const user = await models.users.findOne({
       where: {

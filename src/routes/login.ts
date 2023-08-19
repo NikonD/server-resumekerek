@@ -26,23 +26,23 @@ const authenticateUser = async (email: string, password: string) => {
 
 loginRoute.route("/login").post(async (req: Request, res: Response) => {
   const { email, password } = req.body;
-  console.log("111")
   const user = await authenticateUser(email, password);
   if (!user) {
-    return res.status(401).json({ message: 'Invalid credentials' });
+    return res.status(401).json({ status: "401", message: 'Invalid credentials' });
   }
   const token = jwt.sign({ userId: user.id }, config.JWT_SECRET);
 
-  res.json({ 
-    message: 'Logged in successfully', 
-    token: token, 
-    user: { 
-      email: user.email, 
-      fullname: user.fullname, 
-      plan: user.plan, 
-      active_until: 
-      user.active_until 
-    } 
+  res.json({
+    status: "200",
+    message: 'Logged in successfully',
+    token: token,
+    user: {
+      email: user.email,
+      fullname: user.fullname,
+      plan: user.plan,
+      active_until:
+        user.active_until
+    }
   });
 })
 
@@ -79,25 +79,32 @@ loginRoute.route("/registration").post(async (req: Request, res: Response) => {
 
   // Проверка, что пользователь с таким именем пользователя не существует.
   if (await models.users.findOne({ where: { email: email } })) {
-    return res.status(400).json({ message: 'Username already exists' });
+    return res.status(400).json({ message: 'Username already exists', code: "1" });
   }
 
   // Создание хеша пароля перед сохранением в базу данных.
   const hashedPassword = hashSync(password, 10);
+  try {
+    let newUser = await models.users.upsert({
+      email: email,
+      password: hashedPassword,
+      verify: false,
+      fullname: fullname
+    })
+    // Создание новой записи пользователя.
+    // const newUser = { id: users.length + 1, username, password: hashedPassword };
+    // users.push(newUser);
 
-  let newUser = await models.users.upsert({
-    email: email,
-    password: hashedPassword,
-    verify: false,
-    fullname: fullname
-  }, { returning: false })
-  // Создание новой записи пользователя.
-  // const newUser = { id: users.length + 1, username, password: hashedPassword };
-  // users.push(newUser);
+    // Создание JWT для нового пользователя и его отправка в ответе.
+    console.log(newUser[0])
+    const token = jwt.sign({ userId: newUser[0].id }, config.JWT_SECRET, { expiresIn: '1d' });
+    res.json({ token: token, user: newUser[0] });
+  }
+  catch (e) {
 
-  // Создание JWT для нового пользователя и его отправка в ответе.
-  const token = jwt.sign({ userId: newUser[0].id }, config.JWT_SECRET, { expiresIn: '1d' });
-  res.json({ token });
+    res.json({message: "server error", code: "2"})
+  }
+  
 })
 
 export { loginRoute }

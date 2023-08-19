@@ -5,6 +5,7 @@ import bodyParser from "body-parser";
 import config from './config/config.json'
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
+import { join } from "path";
 let app: Express = express()
 
 const allowedOrigins = ['http://localhost:3000', 'http://resumekerek.com'];
@@ -33,7 +34,7 @@ app.use(cors({
   }
 }));
 
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(join(__dirname, '..','uploads')));
 
 app.use('/', Routes)
 

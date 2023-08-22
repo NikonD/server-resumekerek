@@ -1,4 +1,9 @@
 {
   "PORT": "",
-  "JWT_SECRET": ""
+  "JWT_SECRET": "",
+  "EPAY_URL": "",
+  "EPAY_CLIENT_SECRET": "",
+  "EPAY_ClientID": "",
+  "EPAY_Password": "",
+  "EPAY_TerminalID": ""
 }

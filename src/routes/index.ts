@@ -7,6 +7,6 @@ let Routes = express.Router()
 
 Routes.use("/api/auth", loginRoute)
 Routes.use("/api/resume", resumeRoute)
-Routes.use("/api/epay", paymentRoute)
+Routes.use("/api/pb", paymentRoute)
 
 export {Routes}

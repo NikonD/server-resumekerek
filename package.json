@@ -28,9 +28,11 @@
     "body-parser": "^1.20.2",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "crypto-js": "^4.1.1",
     "express": "^4.18.2",
     "express-async-handler": "^1.2.0",
     "express-session": "^1.17.3",
+    "form-data": "^4.0.0",
     "fs": "^0.0.1-security",
     "jsonwebtoken": "^9.0.1",
     "multer": "^1.4.5-lts.1",
@@ -40,15 +42,18 @@
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.32.1",
     "sharp": "^0.32.4",
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "xml2js": "^0.6.2"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
     "@types/cookie-parser": "^1.4.3",
     "@types/cors": "^2.8.13",
+    "@types/crypto-js": "^4.1.1",
     "@types/express-session": "^1.17.7",
     "@types/multer": "^1.4.7",
     "@types/pdf-thumbnail": "^1.0.1",
-    "@types/pdf2image": "^1.2.1"
+    "@types/pdf2image": "^1.2.1",
+    "@types/xml2js": "^0.4.11"
   }
 }

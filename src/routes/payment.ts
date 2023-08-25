@@ -11,6 +11,26 @@ import { parseStringPromise } from 'xml2js';
 let paymentRoute = Router()
 
 
+paymentRoute.post('/check-payment', async (req, res) => {
+  console.log("RESULT C", req.body)
+  console.log("RESULT Q", req.query)
+})
+
+paymentRoute.post('/result-payment', async (req, res) => {
+  console.log("RESULT R", req.body)
+  console.log("RESULT Q", req.query)
+})
+
+paymentRoute.post('/error-payment', async (req, res) => {
+  console.log("RESULT E", req.body)
+  console.log("RESULT Q", req.query)
+})
+
+paymentRoute.post('/success-payment', async (req, res) => {
+  console.log("RESULT S", req.body)
+  console.log("RESULT Q", req.query)
+})
+
 paymentRoute.post('/initiate-payment', async (req, res) => {
 
   const payboxMerchantId = config.PB_merchantID;

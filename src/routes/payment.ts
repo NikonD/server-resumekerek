@@ -42,7 +42,7 @@ paymentRoute.post('/result-payment', async (req, res) => {
         case 'sub1':
           nextDate = oneMonthLater
           break;
-        case 'sub3':
+        case 'sub2':
           nextDate = sixMonthsLater
           break;
         case 'sub3':

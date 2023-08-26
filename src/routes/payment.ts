@@ -7,6 +7,8 @@ import * as CryptoJS from 'crypto';
 import axios from "axios";
 import FormData from "form-data";
 import { parseStringPromise } from 'xml2js';
+import { models } from "../models";
+import moment from 'moment'
 
 let paymentRoute = Router()
 
@@ -19,17 +21,54 @@ paymentRoute.post('/check-payment', async (req, res) => {
 paymentRoute.post('/result-payment', async (req, res) => {
   console.log("RESULT R", req.body)
   console.log("RESULT Q", req.query)
+
+  const currentDate = moment()
+  const oneMonthLater = currentDate.clone().add(1, 'months')
+  const sixMonthsLater = currentDate.clone().add(6, 'months')
+  const oneYearLater = currentDate.clone().add(1, 'years')
+
+  try {
+    const {
+      pg_resul,
+      pg_user_contact_email,
+      pg_description
+    } = req.body
+    if (pg_resul == 1) {
+      const arrayDecriptions = pg_description.split(';')
+
+      let nextDate = moment()
+
+      switch (arrayDecriptions) {
+        case 'sub1':
+          nextDate = oneMonthLater
+          break;
+        case 'sub3':
+          nextDate = sixMonthsLater
+          break;
+        case 'sub3':
+          nextDate = oneYearLater
+          break;
+      }
+
+      models.users.update(
+        { 
+          active_until: nextDate.toDate()
+        }, 
+        {
+          where: {
+            email: pg_user_contact_email
+          }
+        })
+    }
+    res.json(req.body)
+  } catch (e) {
+    res.json(req.body)
+  }
+
+
 })
 
-paymentRoute.post('/error-payment', async (req, res) => {
-  console.log("RESULT E", req.body)
-  console.log("RESULT Q", req.query)
-})
 
-paymentRoute.post('/success-payment', async (req, res) => {
-  console.log("RESULT S", req.body)
-  console.log("RESULT Q", req.query)
-})
 
 paymentRoute.post('/initiate-payment', async (req, res) => {
 
@@ -38,8 +77,8 @@ paymentRoute.post('/initiate-payment', async (req, res) => {
 
   const formData = req.body
   formData.pg_merchant_id = payboxMerchantId
+  formData.pg_salt = config.PB_salt
 
-  // Создание строки для подписи
   let signatureString = Object.entries(formData)
     .sort()
     .map(([key, value]) => value)
@@ -48,7 +87,7 @@ paymentRoute.post('/initiate-payment', async (req, res) => {
 
   signatureString = `${formData.script};${signatureString}`
   console.log(signatureString)
-  // Генерация подписи
+
   const signature = CryptoJS.createHash('md5').update(signatureString).digest('hex');
 
   const requestData = new FormData();
@@ -66,14 +105,14 @@ paymentRoute.post('/initiate-payment', async (req, res) => {
 
     const xmlResponse = response.data;
     const parsedResponse = await parseStringPromise(xmlResponse, { explicitArray: false });
-    
+
     console.log('Разобранный XML-ответ:', parsedResponse);
-    
+
     // Теперь вы можете обращаться к полям ответа, например:
     const paymentId = parsedResponse.response.pg_payment_id;
     const redirectUrl = parsedResponse.response.pg_redirect_url;
-    
-    res.json({paymentId, redirectUrl})
+
+    res.json({ paymentId, redirectUrl })
 
     // console.log('Ответ от PayBox:', response.data);
     // Здесь вы можете обработать ответ от PayBox

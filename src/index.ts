@@ -8,7 +8,7 @@ import session from 'express-session';
 import { join } from "path";
 let app: Express = express()
 
-const allowedOrigins = ['http://localhost:3000', 'http://resumekerek.com'];
+const allowedOrigins = ['http://localhost:3000', 'https://resumekerek.com'];
 
 app.use(bodyParser.urlencoded({ extended: true, limit:"50mb" }))
 

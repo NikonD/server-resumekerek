@@ -29,11 +29,11 @@ paymentRoute.post('/result-payment', async (req, res) => {
 
   try {
     const {
-      pg_resul,
+      pg_result,
       pg_user_contact_email,
       pg_description
     } = req.body
-    if (pg_resul == 1) {
+    if (pg_result == 1) {
       const arrayDecriptions = pg_description.split(';')
 
       let nextDate = moment()

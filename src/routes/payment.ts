@@ -38,7 +38,7 @@ paymentRoute.post('/result-payment', async (req, res) => {
 
       let nextDate = moment()
 
-      switch (arrayDecriptions) {
+      switch (arrayDecriptions[0]) {
         case 'sub1':
           nextDate = oneMonthLater
           break;
@@ -49,7 +49,7 @@ paymentRoute.post('/result-payment', async (req, res) => {
           nextDate = oneYearLater
           break;
       }
-
+      // console.log(nextDate)
       models.users.update(
         { 
           active_until: nextDate.toDate()

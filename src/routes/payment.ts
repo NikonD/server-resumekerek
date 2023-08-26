@@ -49,7 +49,7 @@ paymentRoute.post('/result-payment', async (req, res) => {
           nextDate = oneYearLater
           break;
       }
-      // console.log(nextDate)
+      console.log(nextDate)
       models.users.update(
         { 
           active_until: nextDate.toDate()

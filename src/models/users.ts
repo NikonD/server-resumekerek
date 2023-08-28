@@ -10,12 +10,15 @@ export interface usersAttributes {
   email: string;
   plan?: number;
   active_until?: Date;
-  profile_data?: object;
+  phone?: string;
+  language?: string;
+  photo?: string;
+  address?: string;
 }
 
 export type usersPk = "id";
 export type usersId = users[usersPk];
-export type usersOptionalAttributes = "id" | "verify_at" | "plan" | "active_until" | "profile_data";
+export type usersOptionalAttributes = "id" | "verify_at" | "plan" | "active_until" | "phone" | "language" | "photo" | "address";
 export type usersCreationAttributes = Optional<usersAttributes, usersOptionalAttributes>;
 
 export class users extends Model<usersAttributes, usersCreationAttributes> implements usersAttributes {
@@ -27,7 +30,10 @@ export class users extends Model<usersAttributes, usersCreationAttributes> imple
   email!: string;
   plan?: number;
   active_until?: Date;
-  profile_data?: object;
+  phone?: string;
+  language?: string;
+  photo?: string;
+  address?: string;
 
 
   static initModel(sequelize: Sequelize.Sequelize): typeof users {
@@ -67,8 +73,20 @@ export class users extends Model<usersAttributes, usersCreationAttributes> imple
       type: DataTypes.DATE,
       allowNull: true
     },
-    profile_data: {
-      type: DataTypes.JSON,
+    phone: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    language: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    photo: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    address: {
+      type: DataTypes.TEXT,
       allowNull: true
     }
   }, {

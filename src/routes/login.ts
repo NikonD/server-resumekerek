@@ -24,6 +24,77 @@ const authenticateUser = async (email: string, password: string) => {
 
 };
 
+
+loginRoute.route("/update").post(async (req: Request, res: Response) => {
+  const { email, phone, photo, address, fullname, language, password, newPassword } = req.body
+  console.log(req.body)
+  const token = req.headers.authorization?.replace('Bearer ', '')
+  if (!token) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  try {
+    const decodedToken = jwt.verify(token, config.JWT_SECRET) as { userId: number };
+
+    const user = await models.users.findOne({
+      where: {
+        id: decodedToken.userId
+      }
+    })
+    if (!user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    if (password && newPassword) {
+      if (compareSync(user.password, password)) {
+        return res.status(401).json({ staus: "error", code: 5, message: "password mismatch" })
+      }
+    }
+
+
+    if (newPassword) {
+      const hashedPassword = hashSync(newPassword, 10);
+
+      await models.users.update({
+        email: email,
+        address: address,
+        phone: phone,
+        photo: photo,
+        password: hashedPassword,
+        language: language,
+        fullname: fullname
+      }, {
+        where: {
+          id: user.id
+        }
+      })
+    }
+    else {
+      await models.users.update({
+        email: email,
+        address: address,
+        phone: phone,
+        photo: photo,
+        language: language,
+        fullname: fullname
+      }, {
+        where: {
+          id: user.id
+        }
+      })
+    }
+
+
+
+
+    res.json({ status: "ok" })
+    // return res.status(401).json({ message: 'Unauthorized' });
+  } catch (e) {
+    console.log(e)
+    res.json({ status: "error" })
+  }
+
+})
+
 loginRoute.route("/login").post(async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const user = await authenticateUser(email, password);
@@ -61,7 +132,17 @@ loginRoute.route("/verify").post(async (req: Request, res: Response) => {
     const user = await models.users.findOne({
       where: {
         id: decodedToken.userId
-      }, attributes: ["email", "fullname", "id", "plan", "active_until"]
+      }, attributes: [
+        "email",
+        "fullname",
+        "id",
+        "plan",
+        "active_until",
+        "address",
+        "photo",
+        "phone",
+        "language"
+      ]
     })
     if (!user) {
       return res.status(401).json({ message: 'Unauthorized' });
@@ -102,9 +183,9 @@ loginRoute.route("/registration").post(async (req: Request, res: Response) => {
   }
   catch (e) {
 
-    res.json({message: "server error", code: "2"})
+    res.json({ message: "server error", code: "2" })
   }
-  
+
 })
 
 export { loginRoute }

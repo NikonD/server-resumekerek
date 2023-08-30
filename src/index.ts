@@ -35,7 +35,7 @@ app.use(cors({
 }));
 
 app.use('/uploads', express.static(join(__dirname, '..','uploads')));
-
+app.use(`/pub`, express.static(join(__dirname, '..', 'pub')))
 app.use('/', Routes)
 
 app.listen(config.PORT, ()=>{

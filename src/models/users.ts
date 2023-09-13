@@ -1,5 +1,6 @@
 import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
+import type { orders, ordersId } from './orders';
 
 export interface usersAttributes {
   id: number;
@@ -35,6 +36,18 @@ export class users extends Model<usersAttributes, usersCreationAttributes> imple
   photo?: string;
   address?: string;
 
+  // users hasMany orders via user_id
+  orders!: orders[];
+  getOrders!: Sequelize.HasManyGetAssociationsMixin<orders>;
+  setOrders!: Sequelize.HasManySetAssociationsMixin<orders, ordersId>;
+  addOrder!: Sequelize.HasManyAddAssociationMixin<orders, ordersId>;
+  addOrders!: Sequelize.HasManyAddAssociationsMixin<orders, ordersId>;
+  createOrder!: Sequelize.HasManyCreateAssociationMixin<orders>;
+  removeOrder!: Sequelize.HasManyRemoveAssociationMixin<orders, ordersId>;
+  removeOrders!: Sequelize.HasManyRemoveAssociationsMixin<orders, ordersId>;
+  hasOrder!: Sequelize.HasManyHasAssociationMixin<orders, ordersId>;
+  hasOrders!: Sequelize.HasManyHasAssociationsMixin<orders, ordersId>;
+  countOrders!: Sequelize.HasManyCountAssociationsMixin;
 
   static initModel(sequelize: Sequelize.Sequelize): typeof users {
     return users.init({

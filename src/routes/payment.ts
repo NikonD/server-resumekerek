@@ -31,7 +31,11 @@ paymentRoute.post('/result-payment', async (req, res) => {
     const {
       pg_result,
       pg_user_contact_email,
-      pg_description
+      pg_description,
+      pg_amount,
+      pg_currency,
+      pg_order_id,
+      pg_payment_id
     } = req.body
     if (pg_result == 1) {
       const arrayDecriptions = pg_description.split(';')
@@ -49,16 +53,34 @@ paymentRoute.post('/result-payment', async (req, res) => {
           nextDate = oneYearLater
           break;
       }
+
+      let user = await models.users.findOne({
+        where: {
+          email: pg_user_contact_email
+        }
+      })
+
       console.log(nextDate)
       models.users.update(
-        { 
+        {
           active_until: nextDate.toDate()
-        }, 
+        },
         {
           where: {
             email: pg_user_contact_email
           }
         })
+      
+      models.orders.create({
+        pg_amount: pg_amount,
+        pg_currency: pg_currency,
+        pg_description: pg_description,
+        pg_order_id: pg_order_id,
+        pg_result: pg_result,
+        pg_contact_email: pg_user_contact_email,
+        pg_payment_id: pg_payment_id,
+        user_id: user?.id || 0
+      })
     }
     res.json(req.body)
   } catch (e) {
@@ -71,7 +93,13 @@ paymentRoute.post('/result-payment', async (req, res) => {
 
 
 paymentRoute.post('/initiate-payment', async (req, res) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
 
+  console.log(token)
+  if (!token) {
+    console.log(token)
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
   const payboxMerchantId = config.PB_merchantID;
   const secretKey = config.PB_secretKey;
 
@@ -148,6 +176,63 @@ paymentRoute.route("/postlink").post(async (req: Request, res: Response) => {
     res.json({})
   } catch (e) {
 
+  }
+})
+
+paymentRoute.route("/revoke").post(async (req: Request, res: Response) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+
+  console.log(token)
+  if (!token) {
+    console.log(token)
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+  try {
+    const payboxMerchantId = config.PB_merchantID;
+    const secretKey = config.PB_secretKey;
+
+    const formData = req.body
+    formData.pg_merchant_id = payboxMerchantId
+    formData.pg_salt = config.PB_salt
+
+    let signatureString = Object.entries(formData)
+      .sort()
+      .map(([key, value]) => value)
+      .concat(secretKey)
+      .join(';');
+
+    signatureString = `${formData.script};${signatureString}`
+    console.log(signatureString)
+
+    const signature = CryptoJS.createHash('md5').update(signatureString).digest('hex');
+
+    const requestData = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+      requestData.append(key, value);
+    });
+    requestData.append('pg_sig', signature);
+
+    const response = await axios.post('https://api.paybox.money/revoke.php', requestData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    const xmlResponse = response.data;
+    const parsedResponse = await parseStringPromise(xmlResponse, { explicitArray: false });
+
+    console.log('Разобранный XML-ответ:', parsedResponse);
+
+    // Теперь вы можете обращаться к полям ответа, например:
+    const paymentId = parsedResponse.response.pg_payment_id;
+    const redirectUrl = parsedResponse.response.pg_redirect_url;
+
+    res.json({ paymentId, redirectUrl })
+
+    // console.log('Ответ от PayBox:', response.data);
+    // Здесь вы можете обработать ответ от PayBox
+  } catch (e) {
+    res.json()
   }
 })
 

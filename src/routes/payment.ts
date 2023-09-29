@@ -86,8 +86,6 @@ paymentRoute.post('/result-payment', async (req, res) => {
   } catch (e) {
     res.json(req.body)
   }
-
-
 })
 
 

@@ -75,7 +75,7 @@ paymentRoute.post('/result-payment', async (req, res) => {
         pg_amount: pg_amount,
         pg_currency: pg_currency,
         pg_description: pg_description,
-        pg_order_id: pg_order_id,
+        pg_order_id: pg_order_id? pg_order_id : "0",
         pg_result: pg_result,
         pg_contact_email: pg_user_contact_email,
         pg_payment_id: pg_payment_id,

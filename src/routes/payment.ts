@@ -1,7 +1,5 @@
 import { Request, Response, Router } from "express";
-// import jwt from 'jsonwebtoken';
 import config from '../config/config.json'
-// import { models } from "../models";
 import { epayAuthToken } from "../helpers/epayAuth";
 import * as CryptoJS from 'crypto';
 import axios from "axios";
@@ -16,6 +14,47 @@ let paymentRoute = Router()
 paymentRoute.post('/check-payment', async (req, res) => {
   console.log("RESULT C", req.body)
   console.log("RESULT Q", req.query)
+})
+
+paymentRoute.post('/check-payment-file', async (req, res) => {
+  console.log("RESULT C", req.body)
+  console.log("RESULT Q", req.query)
+
+  try {
+    const {
+      pg_result,
+      pg_user_contact_email,
+      pg_description,
+      pg_amount,
+      pg_currency,
+      pg_order_id,
+      pg_payment_id
+    } = req.body
+
+    if (pg_result == 1) {
+
+      let user = await models.users.findOne({
+        where: {
+          email: pg_user_contact_email
+        }
+      })
+
+      models.orders.create({
+        pg_amount: pg_amount,
+        pg_currency: pg_currency,
+        pg_description: pg_description,
+        pg_order_id: pg_order_id ? pg_order_id : "0",
+        pg_result: pg_result,
+        pg_contact_email: pg_user_contact_email,
+        pg_payment_id: pg_payment_id,
+        user_id: user?.id || 0
+      })
+    }
+    res.json(req.body)
+  } catch (e) {
+    res.json(req.body)
+  }
+
 })
 
 paymentRoute.post('/result-payment', async (req, res) => {
@@ -70,12 +109,12 @@ paymentRoute.post('/result-payment', async (req, res) => {
             email: pg_user_contact_email
           }
         })
-      
+
       models.orders.create({
         pg_amount: pg_amount,
         pg_currency: pg_currency,
         pg_description: pg_description,
-        pg_order_id: pg_order_id? pg_order_id : "0",
+        pg_order_id: pg_order_id ? pg_order_id : "0",
         pg_result: pg_result,
         pg_contact_email: pg_user_contact_email,
         pg_payment_id: pg_payment_id,
@@ -134,14 +173,14 @@ paymentRoute.post('/initiate-payment', async (req, res) => {
 
     console.log('Разобранный XML-ответ:', parsedResponse);
 
-    // Теперь вы можете обращаться к полям ответа, например:
+
     const paymentId = parsedResponse.response.pg_payment_id;
     const redirectUrl = parsedResponse.response.pg_redirect_url;
 
     res.json({ paymentId, redirectUrl })
 
     // console.log('Ответ от PayBox:', response.data);
-    // Здесь вы можете обработать ответ от PayBox
+
   } catch (error) {
     console.error('Ошибка при создании платежа:', error);
   }

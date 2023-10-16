@@ -245,7 +245,7 @@ paymentRoute.route('/findorder').post(async (req: Request, res: Response) => {
         pg_contact_email: user.email
       }
     })
-    res.json({isPaid: !!order, message: "ok"})   
+    res.json({isPaid: Boolean(order), message: "ok"})   
   }
   catch (e) {
     res.json({isPaid: false, message: "Internal error"})   

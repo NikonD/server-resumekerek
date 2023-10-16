@@ -7,7 +7,7 @@ import FormData from "form-data";
 import { parseStringPromise } from 'xml2js';
 import { models } from "../models";
 import moment from 'moment'
-
+import jwt from 'jsonwebtoken';
 let paymentRoute = Router()
 
 
@@ -213,6 +213,42 @@ paymentRoute.route("/postlink").post(async (req: Request, res: Response) => {
     res.json({})
   } catch (e) {
 
+  }
+})
+
+paymentRoute.route('/findorder').post(async (req: Request, res: Response) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+
+  console.log(token)
+  if (!token) {
+    console.log(token)
+    return res.status(401).json({isPaid: false, message: 'Unauthorized' });
+  }
+  try {
+
+    const {
+      order_id
+    } = req.body
+    
+    const decoded = jwt.verify(token, config.JWT_SECRET) as { userId: number };
+    console.log("DECODED", decoded)
+
+
+    let user = await models.users.findOne({ where: { id: decoded.userId } })
+    if (!user) {
+      return res.status(401).json({isPaid: false, message: 'Unauthorized' });
+    }
+
+    const order = await models.orders.findOne({
+      where: {
+        pg_order_id: order_id,
+        pg_contact_email: user.email
+      }
+    })
+    res.json({isPaid: !!order, message: "ok"})   
+  }
+  catch (e) {
+    res.json({isPaid: false, message: "Internal error"})   
   }
 })
 

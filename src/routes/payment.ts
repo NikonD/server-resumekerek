@@ -16,7 +16,7 @@ paymentRoute.post('/check-payment', async (req, res) => {
   console.log("RESULT Q", req.query)
 })
 
-paymentRoute.post('/check-payment-file', async (req, res) => {
+paymentRoute.post('/result-payment-file', async (req, res) => {
   console.log("RESULT C", req.body)
   console.log("RESULT Q", req.query)
 

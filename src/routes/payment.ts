@@ -238,13 +238,15 @@ paymentRoute.route('/findorder').post(async (req: Request, res: Response) => {
     if (!user) {
       return res.status(401).json({isPaid: false, message: 'Unauthorized' });
     }
-
+    console.log("FINDER", order_id)
+    console.log("FINDER", user.email)
     const order = await models.orders.findOne({
       where: {
         pg_order_id: order_id,
         pg_contact_email: user.email
       }
     })
+    console.log("FINDER", order)
     res.json({isPaid: Boolean(order), message: "ok"})   
   }
   catch (e) {

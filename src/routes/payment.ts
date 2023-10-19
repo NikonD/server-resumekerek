@@ -161,6 +161,7 @@ paymentRoute.post('/initiate-payment', async (req, res) => {
 
   const requestData = new FormData();
   Object.entries(formData).forEach(([key, value]) => {
+    if (key!='filename')
     requestData.append(key, value);
   });
   requestData.append('pg_sig', signature);

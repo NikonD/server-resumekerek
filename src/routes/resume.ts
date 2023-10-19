@@ -83,6 +83,64 @@ resumeRoute.route(`/upload/qr`).post(upload.single('file'), async (req: Request,
 
 })
 
+resumeRoute.route('/onefile').post(async (req: Request, res: Response) => {
+  const { data, fileName, resumeObject, theme, settings } = req.body;
+
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  console.log(req.body)
+  console.log(token)
+  if (!token) {
+    console.log(token)
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  if (!data) {
+    res.status(400).send('No file data provided.');
+    return;
+  }
+
+  try {
+    const decoded = jwt.verify(token, config.JWT_SECRET) as { userId: number };
+
+    let user = await models.users.findOne({ where: { id: decoded.userId } })
+    if (!user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    
+    let dateCode = `${new Date().getDate()}${new Date().getMonth()}${new Date().getHours()}${new Date().getMinutes()}`
+    let fullFileName = `resume-${dateCode}-${theme}-${fileName.replace(/\s/g, '')}.pdf`
+
+    await models.resumes.create({
+      user_id: user.id,
+      filename: fullFileName,
+      resume: resumeObject,
+      template: theme,
+      preview: "",
+      settings: settings
+      // date_create: new Date()
+    })
+
+    const base64Data = data.replace(/^data:.*,/, '');
+    const buffer = Buffer.from(base64Data, 'base64');
+    const filePath = join(__dirname, '..', '..', 'uploads', 'pdf', fullFileName)
+
+    writeFile(filePath, buffer, (error) => {
+      if (error) {
+        console.error('Error saving file:', error);
+        res.status(500).send('Error saving file on server.');
+      } else {
+        res.json({ status: "ok", filename: fullFileName });
+      }
+    })
+  }
+  catch(e) {
+    console.log((e as Error).message)
+    res.json({ status: "error" })
+  }
+
+})
+
 resumeRoute.route(`/upload/pdf`).post(async (req: Request, res: Response) => {
   const { data, fileName, resumeObject, theme, preview, settings } = req.body;
   const token = req.headers.authorization?.replace('Bearer ', '');

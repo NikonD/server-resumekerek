@@ -37,7 +37,7 @@ resumeRoute.route('/list').post(async (req: Request, res: Response) => {
       where: {
         user_id: user.id
       }
-    })    
+    })
 
     res.json({ status: "ok", resumes })
   } catch (e) {
@@ -107,7 +107,7 @@ resumeRoute.route('/onefile').post(async (req: Request, res: Response) => {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    
+
     let dateCode = `${new Date().getDate()}${new Date().getMonth()}${new Date().getHours()}${new Date().getMinutes()}`
     let fullFileName = `resume-${dateCode}-${theme}-${fileName.replace(/\s/g, '')}.pdf`
 
@@ -134,7 +134,7 @@ resumeRoute.route('/onefile').post(async (req: Request, res: Response) => {
       }
     })
   }
-  catch(e) {
+  catch (e) {
     console.log((e as Error).message)
     res.json({ status: "error" })
   }
@@ -196,6 +196,41 @@ resumeRoute.route(`/upload/pdf`).post(async (req: Request, res: Response) => {
     console.log((e as Error).message)
     res.json({ status: "error" })
   }
+})
+
+resumeRoute.route('/remove').post(async (req: Request, res: Response) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+
+  const {
+    resume_id
+  } = req.body
+
+  if (!token) {
+    console.log(token)
+    return res.status(401).json({status: "error", message: 'Unauthorized' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, config.JWT_SECRET) as { userId: number };
+
+    let user = await models.users.findOne({ where: { id: decoded.userId } })
+    if (!user) {
+      return res.status(401).json({status: "error", message: 'Unauthorized' });
+    }
+
+    await models.resumes.destroy({
+      where: {
+        id: resume_id
+      }
+    })
+    
+    res.json({ status: "ok" })
+  } catch (e) {
+    console.log((e as Error).message)
+    res.json({ status: "error" })
+  }
+
+
 })
 
 resumeRoute.route(`/upload/photo`).post(async (req: Request, res: Response) => {
